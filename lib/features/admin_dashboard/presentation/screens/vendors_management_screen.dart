@@ -14,6 +14,7 @@ class VendorsManagementScreen extends ConsumerStatefulWidget {
 class _VendorsManagementScreenState
     extends ConsumerState<VendorsManagementScreen> {
   String _query = '';
+  String _statusFilter = 'all'; // all, approved, pending
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +27,10 @@ class _VendorsManagementScreenState
         children: [
           Row(
             children: [
-              const Text('إدارة الموردين',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const Text(
+                'إدارة الموردين',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
               const Spacer(),
               SizedBox(
                 width: 300,
@@ -42,71 +45,124 @@ class _VendorsManagementScreenState
               ),
             ],
           ),
+          const SizedBox(height: 12),
+
+          // Status Filters
+          Row(
+            children: [
+              _filterChip('الكل', 'all'),
+              const SizedBox(width: 8),
+              _filterChip('معتمد', 'approved'),
+              const SizedBox(width: 8),
+              _filterChip('قيد المراجعة', 'pending'),
+            ],
+          ),
           const SizedBox(height: 16),
+
           Expanded(
             child: async.when(
-              loading: () =>
-              const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('خطأ: $e')),
               data: (vendors) {
-                final filtered = _query.isEmpty
-                    ? vendors
-                    : vendors
-                    .where((v) => (v['store_name'] as String)
-                    .toLowerCase()
-                    .contains(_query.toLowerCase()))
-                    .toList();
+                final filtered = vendors.where((v) {
+                  final approved = v['is_approved'] == true;
+
+                  final matchesQuery = _query.isEmpty ||
+                      (v['store_name'] as String? ?? '')
+                          .toLowerCase()
+                          .contains(_query.toLowerCase()) ||
+                      (v['profiles']?['full_name'] as String? ?? '')
+                          .toLowerCase()
+                          .contains(_query.toLowerCase());
+
+                  final matchesStatus = _statusFilter == 'all' ||
+                      (_statusFilter == 'approved' && approved) ||
+                      (_statusFilter == 'pending' && !approved);
+
+                  return matchesQuery && matchesStatus;
+                }).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('لا يوجد موردين'));
+                  return const Center(child: Text('لا يوجد موردون مطابقون'));
                 }
 
-                return Card(
-                  child: SingleChildScrollView(
-                    child: DataTable(
-                      headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryNavy.withValues(alpha: 0.05)),
-                      columns: const [
-                        DataColumn(label: Text('المورد')),
-                        DataColumn(label: Text('المالك')),
-                        DataColumn(label: Text('الهاتف')),
-                        DataColumn(label: Text('الحالة')),
-                        DataColumn(label: Text('إجراءات')),
-                      ],
-                      rows: filtered.map((v) {
-                        final approved = v['is_approved'] == true;
-                        return DataRow(cells: [
-                          DataCell(Text(v['store_name'] ?? '')),
-                          DataCell(Text(
-                              v['profiles']?['full_name'] ?? '')),
-                          DataCell(Text(v['profiles']?['phone'] ?? '')),
-                          DataCell(Chip(
-                            label: Text(approved ? 'معتمد' : 'قيد المراجعة'),
-                            backgroundColor: approved
-                                ? Colors.green[100]
-                                : Colors.orange[100],
-                          )),
-                          DataCell(Row(
-                            children: [
-                              if (!approved)
-                                IconButton(
-                                  icon: const Icon(Icons.check,
-                                      color: Colors.green),
-                                  onPressed: () => ref
-                                      .read(approveVendorProvider)(
-                                      v['id'], true),
-                                ),
-                              IconButton(
-                                icon: const Icon(Icons.block,
-                                    color: Colors.red),
-                                onPressed: () => ref
-                                    .read(approveVendorProvider)(
-                                    v['id'], false),
-                              ),
-                            ],
-                          )),
-                        ]);
-                      }).toList(),
+                return RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(allVendorsProvider),
+                  child: Card(
+                    child: SingleChildScrollView(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          headingRowColor: WidgetStateProperty.all(
+                            AppColors.primaryNavy.withValues(alpha: 0.05),
+                          ),
+                          columns: const [
+                            DataColumn(label: Text('المورد')),
+                            DataColumn(label: Text('المالك')),
+                            DataColumn(label: Text('الهاتف')),
+                            DataColumn(label: Text('الحالة')),
+                            DataColumn(label: Text('إجراءات')),
+                          ],
+                          rows: filtered.map((v) {
+                            final approved = v['is_approved'] == true;
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(v['store_name'] ?? '')),
+                                DataCell(Text(
+                                  v['profiles']?['full_name'] ?? '—',
+                                )),
+                                DataCell(Text(
+                                  v['profiles']?['phone'] ?? '—',
+                                )),
+                                DataCell(Chip(
+                                  label: Text(
+                                    approved
+                                        ? 'معتمد'
+                                        : 'قيد المراجعة',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  backgroundColor: approved
+                                      ? Colors.green[100]
+                                      : Colors.orange[100],
+                                )),
+                                DataCell(Row(
+                                  children: [
+                                    if (!approved)
+                                      IconButton(
+                                        tooltip: 'موافقة',
+                                        icon: const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                        ),
+                                        onPressed: () => ref
+                                            .read(approveVendorProvider)(
+                                          v['id'],
+                                          true,
+                                        ),
+                                      ),
+                                    IconButton(
+                                      tooltip: approved
+                                          ? 'إلغاء الاعتماد'
+                                          : 'رفض',
+                                      icon: Icon(
+                                        approved
+                                            ? Icons.block
+                                            : Icons.cancel,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () => ref
+                                          .read(approveVendorProvider)(
+                                        v['id'],
+                                        false,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -115,6 +171,14 @@ class _VendorsManagementScreenState
           ),
         ],
       ),
+    );
+  }
+
+  Widget _filterChip(String label, String value) {
+    return FilterChip(
+      label: Text(label),
+      selected: _statusFilter == value,
+      onSelected: (_) => setState(() => _statusFilter = value),
     );
   }
 }

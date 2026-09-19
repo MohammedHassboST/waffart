@@ -26,6 +26,8 @@ class AdvancedAnalyticsScreen extends ConsumerWidget {
               ref.invalidate(kpiSummaryProvider);
               ref.invalidate(dailyOverviewProvider);
               ref.invalidate(vendorLeaderboardProvider);
+              ref.invalidate(categoryPerformanceProvider);
+              ref.invalidate(offerConversionProvider);
             },
           ),
         ],
@@ -34,6 +36,9 @@ class AdvancedAnalyticsScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(kpiSummaryProvider);
           ref.invalidate(dailyOverviewProvider);
+          ref.invalidate(vendorLeaderboardProvider);
+          ref.invalidate(categoryPerformanceProvider);
+          ref.invalidate(offerConversionProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(12),
@@ -63,7 +68,8 @@ class AdvancedAnalyticsScreen extends ConsumerWidget {
             vendorsAsync.when(
               loading: () => const _LoadingCard(),
               error: (e, _) => Text('خطأ: $e'),
-              data: (list) => _VendorLeaderboard(vendors: list.take(10).toList()),
+              data: (list) =>
+                  _VendorLeaderboard(vendors: list.take(10).toList()),
             ),
             const SizedBox(height: 16),
 
@@ -90,6 +96,9 @@ class AdvancedAnalyticsScreen extends ConsumerWidget {
   }
 }
 
+// ============================================================
+// KPI Grid
+// ============================================================
 class _KpiGrid extends StatelessWidget {
   final Map<String, dynamic> kpi;
   const _KpiGrid({required this.kpi});
@@ -164,14 +173,16 @@ class _KpiTile extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 20),
             ),
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(label,
-                style:
-                const TextStyle(fontSize: 11, color: Colors.grey)),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -179,6 +190,9 @@ class _KpiTile extends StatelessWidget {
   }
 }
 
+// ============================================================
+// Revenue Chart
+// ============================================================
 class _RevenueChart extends StatelessWidget {
   final List<Map<String, dynamic>> data;
   const _RevenueChart({required this.data});
@@ -235,6 +249,9 @@ class _RevenueChart extends StatelessWidget {
   }
 }
 
+// ============================================================
+// Vendor Leaderboard
+// ============================================================
 class _VendorLeaderboard extends StatelessWidget {
   final List<Map<String, dynamic>> vendors;
   const _VendorLeaderboard({required this.vendors});
@@ -250,15 +267,17 @@ class _VendorLeaderboard extends StatelessWidget {
           return ListTile(
             leading: CircleAvatar(
               backgroundColor: rank <= 3
-                  ? AppColors.accentGold.withOpacity(0.2)
+                  ? AppColors.accentGold.withValues(alpha: 0.2)
                   : Colors.grey[200],
-              child: Text('$rank',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: rank <= 3
-                        ? AppColors.accentGold
-                        : Colors.grey[700],
-                  )),
+              child: Text(
+                '$rank',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: rank <= 3
+                      ? AppColors.accentGold
+                      : Colors.grey[700],
+                ),
+              ),
             ),
             title: Text(v['store_name'] ?? ''),
             subtitle: Text(
@@ -267,9 +286,12 @@ class _VendorLeaderboard extends StatelessWidget {
             ),
             trailing: Text(
               Formatters.currency(
-                  (v['total_revenue'] as num?)?.toDouble() ?? 0),
+                (v['total_revenue'] as num?)?.toDouble() ?? 0,
+              ),
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.success),
+                fontWeight: FontWeight.bold,
+                color: AppColors.success,
+              ),
             ),
           );
         }).toList(),
@@ -278,6 +300,9 @@ class _VendorLeaderboard extends StatelessWidget {
   }
 }
 
+// ============================================================
+// Category Pie Chart
+// ============================================================
 class _CategoryChart extends StatelessWidget {
   final List<Map<String, dynamic>> data;
   const _CategoryChart({required this.data});
@@ -286,7 +311,9 @@ class _CategoryChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) return const _EmptyCard();
     final total = data.fold<double>(
-        0, (s, e) => s + ((e['revenue'] as num?)?.toDouble() ?? 0));
+      0,
+          (s, e) => s + ((e['revenue'] as num?)?.toDouble() ?? 0),
+    );
     if (total == 0) return const _EmptyCard();
 
     return Card(
@@ -302,8 +329,8 @@ class _CategoryChart extends StatelessWidget {
                 return PieChartSectionData(
                   value: value,
                   title: '${pct.toStringAsFixed(0)}%',
-                  color: Colors.primaries[
-                  data.indexOf(e) % Colors.primaries.length],
+                  color: Colors
+                      .primaries[data.indexOf(e) % Colors.primaries.length],
                   radius: 80,
                   titleStyle: const TextStyle(
                     fontSize: 12,
@@ -322,6 +349,9 @@ class _CategoryChart extends StatelessWidget {
   }
 }
 
+// ============================================================
+// Offer Conversion
+// ============================================================
 class _OfferConversion extends StatelessWidget {
   final List<Map<String, dynamic>> data;
   const _OfferConversion({required this.data});
@@ -334,8 +364,11 @@ class _OfferConversion extends StatelessWidget {
         children: data.map((o) {
           final pct = (o['conversion_pct'] as num?)?.toDouble() ?? 0;
           return ListTile(
-            title: Text(o['title'] ?? '',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Text(
+              o['title'] ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -355,8 +388,10 @@ class _OfferConversion extends StatelessWidget {
                 ),
               ],
             ),
-            trailing: Text('${pct.toStringAsFixed(0)}%',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            trailing: Text(
+              '${pct.toStringAsFixed(0)}%',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           );
         }).toList(),
       ),
@@ -364,6 +399,9 @@ class _OfferConversion extends StatelessWidget {
   }
 }
 
+// ============================================================
+// Shared Widgets
+// ============================================================
 class _SectionTitle extends StatelessWidget {
   final String title;
   const _SectionTitle(this.title);
@@ -372,8 +410,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
@@ -383,16 +423,20 @@ class _LoadingCard extends StatelessWidget {
   const _LoadingCard({this.height = 100});
   @override
   Widget build(BuildContext context) => Card(
-      child: SizedBox(
-          height: height,
-          child: const Center(child: CircularProgressIndicator())));
+    child: SizedBox(
+      height: height,
+      child: const Center(child: CircularProgressIndicator()),
+    ),
+  );
 }
 
 class _EmptyCard extends StatelessWidget {
   const _EmptyCard();
   @override
   Widget build(BuildContext context) => const Card(
-      child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text('لا توجد بيانات'))));
+    child: Padding(
+      padding: EdgeInsets.all(24),
+      child: Center(child: Text('لا توجد بيانات')),
+    ),
+  );
 }

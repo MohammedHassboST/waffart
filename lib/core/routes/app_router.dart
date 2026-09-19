@@ -1,93 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../features/admin/presentation/screens/admin_main_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/phone_login_screen.dart';
-import '../../features/customer/presentation/screens/customer_main_screen.dart';
-import '../../features/vendor/presentation/screens/vendor_main_screen.dart';
+import '../../features/offers_feed/presentation/screens/offers_feed_screen.dart';
+import '../../features/admin_dashboard/presentation/screens/admin_mobile_layout.dart';
+import '../../features/admin_dashboard/presentation/screens/admin_web_layout.dart';
+import '../../core/responsive/responsive_helper.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authNotifier = ValueNotifier<bool>(false);
-
+  // 🔔 notifier يستمع لتغيّر حالة تسجيل الدخول ويُبلّغ GoRouter
+  final notifier = ValueNotifier<bool>(false);
   ref.listen<AuthState>(authControllerProvider, (prev, next) {
-    authNotifier.value = next.isLoggedIn;
+    notifier.value = next.isLoggedIn;
   });
-
-  ref.onDispose(authNotifier.dispose);
+  ref.onDispose(notifier.dispose);
 
   return GoRouter(
     initialLocation: '/login',
-    debugLogDiagnostics: true,
-    refreshListenable: authNotifier,
-
+    refreshListenable: notifier,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final isLoggedIn = authState.isLoggedIn;
-      final user = authState.user;
-      final location = state.matchedLocation;
-      final isLoggingIn = location == '/login';
+      final isLoggingIn = state.matchedLocation == '/login';
+      final isAdminRoute = state.matchedLocation.startsWith('/admin');
 
+      // ❌ غير مسجل دخول → وجّهه لـ /login
       if (!isLoggedIn && !isLoggingIn) return '/login';
+
+      // ✅ مسجل دخول وواقف على /login → وجّهه حسب الدور
       if (isLoggedIn && isLoggingIn) {
-        return _homeForRole(user?.role);
+        final role = authState.user?.role;
+        switch (role) {
+          case 'admin':
+            return '/admin';
+          case 'vendor':
+          // مؤقتاً: وجّهه لـ /offers لحد ما نبني /vendor
+            return '/offers';
+          default:
+            return '/offers';
+        }
       }
 
-      // 🛡️ حماية المسارات حسب الدور
-      if (isLoggedIn && user != null) {
-        if (location.startsWith('/admin') && user.role != 'admin') {
-          return _homeForRole(user.role);
-        }
-        if (location.startsWith('/vendor') && user.role != 'vendor') {
-          return _homeForRole(user.role);
-        }
-        if (location.startsWith('/customer') && user.role != 'customer') {
-          return _homeForRole(user.role);
-        }
+      // ✅ مسجل دخول لكن بيحاول يدخل /admin وهو مش admin
+      if (isLoggedIn && isAdminRoute && authState.user?.role != 'admin') {
+        return '/offers';
       }
 
       return null;
     },
-
     routes: [
+      // ──────────────────────────────────────────────
+      // 🔐 Login
+      // ──────────────────────────────────────────────
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const PhoneLoginScreen(),
       ),
 
-      // 🛒 عميل
+      // ──────────────────────────────────────────────
+      // 🛍️ Offers Feed (الافتراضي للعملاء والموردين)
+      // ──────────────────────────────────────────────
       GoRoute(
-        path: '/customer',
-        name: 'customer',
-        builder: (context, state) => const CustomerMainScreen(),
+        path: '/offers',
+        name: 'offers',
+        builder: (context, state) => const OffersFeedScreen(),
       ),
 
-      // 🏪 مورد
-      GoRoute(
-        path: '/vendor',
-        name: 'vendor',
-        builder: (context, state) => const VendorMainScreen(),
-      ),
-
-      // 👑 مدير
+      // ──────────────────────────────────────────────
+      // 👑 Admin (mobile + web responsive)
+      // ──────────────────────────────────────────────
       GoRoute(
         path: '/admin',
         name: 'admin',
-        builder: (context, state) => const AdminMainScreen(),
+        builder: (context, state) {
+          if (ResponsiveHelper.isDesktop(context)) {
+            return const AdminWebLayout();
+          }
+          return const AdminMobileLayout();
+        },
       ),
     ],
   );
 });
-
-String _homeForRole(String? role) {
-  switch (role) {
-    case 'admin':
-      return '/admin';
-    case 'vendor':
-      return '/vendor';
-    default:
-      return '/customer';
-  }
-}

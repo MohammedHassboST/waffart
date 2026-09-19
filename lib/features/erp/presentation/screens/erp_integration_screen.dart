@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/erp_integration.dart';
 import '../providers/erp_provider.dart';
 import '../widgets/add_integration_dialog.dart';
 import '../widgets/integration_card.dart';
