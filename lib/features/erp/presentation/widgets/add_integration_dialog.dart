@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../vendor_dashboard/presentation/providers/vendor_providers.dart';
+import '../../../vendor/presentation/providers/vendor_providers.dart';
 import '../../domain/entities/erp_integration.dart';
 import '../providers/erp_provider.dart';
 

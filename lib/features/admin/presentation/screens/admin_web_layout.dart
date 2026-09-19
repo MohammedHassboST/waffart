@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+// final user = ref.read(authControllerProvider).valueOrNull;
+// final user = ref.watch(currentUserProvider);
 import '../../../auth/presentation/providers/auth_provider.dart';
 import 'advanced_analytics_screen.dart';
 import 'vendors_management_screen.dart';
