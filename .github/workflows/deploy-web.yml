@@ -1,0 +1,27 @@
+name: Deploy Web Admin
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/features/admin_dashboard/**'
+      - 'lib/main_web.dart'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter build web --release --target=lib/main_web.dart
+      - uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: build/web
+          production-branch: main
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
