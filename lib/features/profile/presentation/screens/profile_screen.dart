@@ -7,7 +7,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
+    // final user = ref.watch(currentUserProvider); 
+    final userAsync = ref.watch(currentUserProvider); // استخدام userAsync للتعامل مع AsyncValue
+
 
     return Scaffold(
       appBar: AppBar(title: const Text('الملف الشخصي')),

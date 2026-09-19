@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/admin/presentation/screens/admin_mobile_layout.dart';
+import '../../features/admin/presentation/screens/admin_web_layout.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/phone_login_screen.dart';
 import '../../features/offers_feed/presentation/screens/offers_feed_screen.dart';
-import '../../features/admin_dashboard/presentation/screens/admin_mobile_layout.dart';
-import '../../features/admin_dashboard/presentation/screens/admin_web_layout.dart';
 import '../../core/responsive/responsive_helper.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {

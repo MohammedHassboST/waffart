@@ -61,6 +61,7 @@ final cartItemCountProvider = Provider<int>((ref) {
 });
 
 // 💳 Checkout
+// ✅ صحيح
 class CheckoutNotifier extends StateNotifier<AsyncValue<OrderResponse?>> {
   final OrderRepository _repo;
   final Ref _ref;
@@ -72,26 +73,39 @@ class CheckoutNotifier extends StateNotifier<AsyncValue<OrderResponse?>> {
     required String deliveryAddress,
     String? notes,
   }) async {
-    final user = _ref.read(currentUserProvider).value; // ✅ value
+    // ─────────────────────────────────────────────────
+    // 1. استخرج AppUser من AsyncValue
+    // ─────────────────────────────────────────────────
+    final userAsync = _ref.read(currentUserProvider);
+    final user = userAsync.valueOrNull;
+
     if (user == null) {
-      state = AsyncValue.error('غير مسجل', StackTrace.current);
+      state = AsyncValue.error(
+        'الرجاء تسجيل الدخول أولاً',
+        StackTrace.current,
+      );
       return null;
     }
 
     final items = _ref.read(cartProvider);
     if (items.isEmpty) {
-      state = AsyncValue.error('السلة فارغة', StackTrace.current);
+      state = AsyncValue.error(
+        'السلة فارغة',
+        StackTrace.current,
+      );
       return null;
     }
 
     state = const AsyncValue.loading();
+
     try {
       final res = await _repo.confirmOrder(
-        customerId: user.id,
+        customerId: user.id,              // ✅ AppUser.id
         items: items,
         deliveryAddress: deliveryAddress,
         notes: notes,
       );
+
       _ref.read(cartProvider.notifier).clear();
       state = AsyncValue.data(res);
       return res;

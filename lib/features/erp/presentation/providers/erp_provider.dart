@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../vendor_dashboard/presentation/providers/vendor_providers.dart';
+import '../../../vendor/presentation/providers/vendor_providers.dart';
 import '../../data/repositories/erp_repository_impl.dart';
 import '../../domain/entities/erp_integration.dart';
 import '../../domain/repositories/erp_repository.dart';
