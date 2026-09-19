@@ -24,7 +24,9 @@ class VendorReportsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: [
-            // الإحصائيات العامة
+            // ═══════════════════════════════════════════════
+            // 📊 الإحصائيات العامة
+            // ═══════════════════════════════════════════════
             statsAsync.when(
               loading: () => const _LoadingCard(),
               error: (_, _) => const SizedBox.shrink(),
@@ -35,7 +37,9 @@ class VendorReportsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // أكثر الأصناف مبيعاً
+            // ═══════════════════════════════════════════════
+            // 🏆 أكثر الأصناف مبيعاً
+            // ═══════════════════════════════════════════════
             const _SectionHeader(
               title: 'أكثر الأصناف مبيعاً',
               icon: Icons.trending_up,
@@ -51,16 +55,18 @@ class VendorReportsScreen extends ConsumerWidget {
                   child: Column(
                     children: list.asMap().entries.map((e) {
                       final item = e.value;
+                      final rank = e.key + 1;
+                      final isTop3 = rank <= 3;
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: e.key < 3
-                              ? AppColors.accentGold.withOpacity(0.2)
+                          backgroundColor: isTop3
+                              ? AppColors.accentGold.withValues(alpha: 0.2)
                               : Colors.grey[200],
                           child: Text(
-                            '${e.key + 1}',
+                            '$rank',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: e.key < 3
+                              color: isTop3
                                   ? AppColors.accentGold
                                   : Colors.grey[700],
                             ),
@@ -77,7 +83,9 @@ class VendorReportsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '${item['total_quantity_sold']} وحدة',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             Text(
                               Formatters.currency(
@@ -98,7 +106,9 @@ class VendorReportsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // أداء العروض
+            // ═══════════════════════════════════════════════
+            // 🎯 أداء العروض
+            // ═══════════════════════════════════════════════
             const _SectionHeader(
               title: 'أداء العروض',
               icon: Icons.local_offer,
@@ -112,7 +122,14 @@ class VendorReportsScreen extends ConsumerWidget {
                 }
                 return Column(
                   children: list.map((o) {
-                    final pct = (o['sell_through_pct'] as num?)?.toDouble() ?? 0;
+                    final pct =
+                        (o['sell_through_pct'] as num?)?.toDouble() ?? 0;
+                    final color = pct > 70
+                        ? AppColors.success
+                        : pct > 30
+                        ? AppColors.accentGold
+                        : AppColors.error;
+
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: Padding(
@@ -122,7 +139,9 @@ class VendorReportsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               o['title'] ?? '',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -134,11 +153,7 @@ class VendorReportsScreen extends ConsumerWidget {
                                       value: pct / 100,
                                       minHeight: 10,
                                       backgroundColor: Colors.grey[300],
-                                      color: pct > 70
-                                          ? AppColors.success
-                                          : pct > 30
-                                          ? AppColors.accentGold
-                                          : AppColors.error,
+                                      color: color,
                                     ),
                                   ),
                                 ),
@@ -153,12 +168,15 @@ class VendorReportsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 6),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   '${o['sold_quantity']} / ${o['total_quantity']} وحدة',
                                   style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                                 Text(
                                   Formatters.currency(
@@ -180,12 +198,17 @@ class VendorReportsScreen extends ConsumerWidget {
                 );
               },
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// 📊 شبكة الإحصائيات
+// ═══════════════════════════════════════════════════════════
 
 class _StatsGrid extends StatelessWidget {
   final Map<String, dynamic> stats;
@@ -223,7 +246,8 @@ class _StatsGrid extends StatelessWidget {
           icon: Icons.attach_money,
           label: 'الإيرادات',
           value: Formatters.currency(
-              (stats['total_revenue'] as num?)?.toDouble() ?? 0),
+            (stats['total_revenue'] as num?)?.toDouble() ?? 0,
+          ),
           color: AppColors.accentGold,
         ),
       ],
@@ -236,6 +260,7 @@ class _StatTile extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
+
   const _StatTile({
     required this.icon,
     required this.label,
@@ -256,7 +281,9 @@ class _StatTile extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 16),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -271,9 +298,14 @@ class _StatTile extends StatelessWidget {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🎨 عناوين الأقسام
+// ═══════════════════════════════════════════════════════════
+
 class _SectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;
+
   const _SectionHeader({required this.title, required this.icon});
 
   @override
@@ -286,7 +318,10 @@ class _SectionHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
         ],
       ),
@@ -294,8 +329,13 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🔄 حالات التحميل والفراغ
+// ═══════════════════════════════════════════════════════════
+
 class _LoadingCard extends StatelessWidget {
   const _LoadingCard();
+
   @override
   Widget build(BuildContext context) => const Card(
     child: SizedBox(
@@ -308,6 +348,7 @@ class _LoadingCard extends StatelessWidget {
 class _EmptyCard extends StatelessWidget {
   final String text;
   const _EmptyCard({required this.text});
+
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(

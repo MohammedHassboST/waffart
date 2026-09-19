@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:waffart/features/vendor_dashboard/presentation/providers/vendor_orders_provider.dart';
 import '../../../../core/network/supabase_client.dart';
+import 'vendor_providers.dart';
 
 final vendorStatsProvider =
 FutureProvider<Map<String, dynamic>?>((ref) async {

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
-import 'admin_home_tab.dart';
-import 'admin_users_tab.dart';
-import 'admin_vendors_tab.dart';
+import '../widgets/admin_home_tab.dart';
+import '../widgets/admin_users_tab.dart';
+import '../widgets/admin_vendors_tab.dart';
 
-class AdminMainScreen extends ConsumerStatefulWidget {
-  const AdminMainScreen({super.key});
+class AdminMobileLayout extends ConsumerStatefulWidget {
+  const AdminMobileLayout({super.key});
 
   @override
-  ConsumerState<AdminMainScreen> createState() => _AdminMainScreenState();
+  ConsumerState<AdminMobileLayout> createState() => _AdminMobileLayoutState();
 }
 
-class _AdminMainScreenState extends ConsumerState<AdminMainScreen> {
+class _AdminMobileLayoutState extends ConsumerState<AdminMobileLayout> {
   int _index = 0;
 
   final _pages = const [
@@ -34,20 +33,17 @@ class _AdminMainScreenState extends ConsumerState<AdminMainScreen> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
-            selectedIcon:
-            Icon(Icons.dashboard, color: AppColors.primaryNavy),
+            selectedIcon: Icon(Icons.dashboard, color: AppColors.primaryNavy),
             label: 'نظرة عامة',
           ),
           NavigationDestination(
             icon: Icon(Icons.people_outline),
-            selectedIcon:
-            Icon(Icons.people, color: AppColors.primaryNavy),
+            selectedIcon: Icon(Icons.people, color: AppColors.primaryNavy),
             label: 'المستخدمون',
           ),
           NavigationDestination(
             icon: Icon(Icons.store_outlined),
-            selectedIcon:
-            Icon(Icons.store, color: AppColors.primaryNavy),
+            selectedIcon: Icon(Icons.store, color: AppColors.primaryNavy),
             label: 'الموردون',
           ),
           NavigationDestination(

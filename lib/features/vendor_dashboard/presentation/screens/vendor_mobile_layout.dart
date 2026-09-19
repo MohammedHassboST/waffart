@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:waffart/features/vendor/presentation/screens/vendor_home_tab.dart';
-import 'package:waffart/features/vendor/presentation/screens/vendor_orders_tab.dart%20dart.dart';
-import 'package:waffart/features/vendor/presentation/screens/vendor_products_tab.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
+import '../widgets/vendor_home_tab.dart';
+import '../widgets/vendor_products_tab.dart';
+import '../widgets/vendor_orders_tab.dart';
 
-
-class VendorMainScreen extends ConsumerStatefulWidget {
-  const VendorMainScreen({super.key});
+class VendorMobileLayout extends ConsumerStatefulWidget {
+  const VendorMobileLayout({super.key});
 
   @override
-  ConsumerState<VendorMainScreen> createState() => _VendorMainScreenState();
+  ConsumerState<VendorMobileLayout> createState() =>
+      _VendorMobileLayoutState();
 }
 
-class _VendorMainScreenState extends ConsumerState<VendorMainScreen> {
+class _VendorMobileLayoutState extends ConsumerState<VendorMobileLayout> {
   int _index = 0;
 
   final _pages = const [

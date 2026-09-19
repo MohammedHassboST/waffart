@@ -45,6 +45,7 @@ FutureProvider<List<Map<String, dynamic>>>((ref) async {
 // مؤشرات KPI
 final kpiSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final client = SupabaseClientProvider.client;
+
   final results = await Future.wait([
     client.from('orders').select('id').count(),
     client.from('profiles').select('id').eq('role', 'customer').count(),

@@ -23,7 +23,6 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
     _NavItem('التحليلات', Icons.analytics, 'analytics'),
     _NavItem('الموردين', Icons.store, 'vendors'),
     _NavItem('الطلبات', Icons.receipt_long, 'orders'),
-    _NavItem('المنتجات', Icons.inventory_2, 'products'),
   ];
 
   Widget _buildBody() {
@@ -41,7 +40,7 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // العودة لاستخدام of الافتراضية
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -122,8 +121,9 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
                                 color: selected
                                     ? AppColors.accentGold
                                     : Colors.white70,
-                                fontWeight:
-                                selected ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: selected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                           ],
@@ -135,10 +135,10 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
 
                 const Spacer(),
 
-                // Language & Logout
+                // Language
                 ListTile(
                   leading: const Icon(Icons.language, color: Colors.white70),
-                  title: Text(l10n.language,
+                  title: Text(l10n!.language,
                       style: const TextStyle(color: Colors.white70)),
                   trailing: DropdownButton<String>(
                     value: ref.watch(localeProvider).languageCode,
@@ -146,10 +146,8 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
                     underline: const SizedBox.shrink(),
                     style: const TextStyle(color: Colors.white),
                     items: [
-                      DropdownMenuItem(
-                          value: 'ar', child: Text(l10n.arabic)),
-                      DropdownMenuItem(
-                          value: 'en', child: Text(l10n.english)),
+                      DropdownMenuItem(value: 'ar', child: Text(l10n!.arabic)),
+                      DropdownMenuItem(value: 'en', child: Text(l10n!.english)),
                     ],
                     onChanged: (v) {
                       if (v != null) {
@@ -160,6 +158,7 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
                     },
                   ),
                 ),
+                // Logout
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.redAccent),
                   title: const Text('تسجيل الخروج',
@@ -198,14 +197,12 @@ class _AdminWebLayoutState extends ConsumerState<AdminWebLayout> {
                       ),
                       const CircleAvatar(
                         backgroundColor: AppColors.accentGold,
-                        child:
-                        Icon(Icons.person, color: AppColors.primaryNavy),
+                        child: Icon(Icons.person, color: AppColors.primaryNavy),
                       ),
                     ],
                   ),
                 ),
                 const Divider(height: 1),
-                // Body
                 Expanded(child: _buildBody()),
               ],
             ),
